@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>e-HUNTAP VERIKOST | Kementerian Perumahan dan Kawasan Permukiman</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS via CDN with custom config -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            pkp: {
+              navy: '#0f172a',
+              dark: '#1e293b',
+              gold: '#eab308',
+              goldDark: '#ca8a04',
+              goldLight: '#fef08a',
+              blue: '#0284c7',
+              accent: '#0369a1',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased">
+
+  <!-- Login Screen -->
+  <section id="loginScreen" class="login-screen">
+    <div class="login-card">
+      <div class="login-brand-panel">
+        <div class="login-mark"><i data-lucide="home" class="w-8 h-8"></i></div>
+        <div class="login-rule"></div>
+        <h1>Sistem Informasi<br>e-HUNTAP VERIKOST</h1>
+        <p>Digitalisasi verifikasi biaya riil dan instrumen audit pengadaan darurat hunian tetap.</p>
+        <div class="login-orbit orbit-one"></div>
+        <div class="login-orbit orbit-two"></div>
+        <span class="login-brand-footer">Kementerian PKP<br><small>Republik Indonesia</small></span>
+      </div>
+      <div class="login-form-panel">
+        <span class="login-eyebrow">SELAMAT DATANG</span>
+        <h2>Masuk ke e-HUNTAP</h2>
+        <p class="login-subtitle">Gunakan akun pegawai atau akun institusi Anda.</p>
+        <form id="loginForm" onsubmit="app.handleLogin(event)">
+          <label class="login-field"><i data-lucide="user-round"></i><input id="loginUsername" required value="199003022024211006" placeholder="NIP / username" autocomplete="username"></label>
+          <label class="login-field"><i data-lucide="lock-keyhole"></i><input id="loginPassword" required type="password" value="demo123" placeholder="Kata sandi" autocomplete="current-password"><button type="button" onclick="app.togglePassword()" aria-label="Tampilkan kata sandi"><i data-lucide="eye"></i></button></label>
+          <div class="login-help"><span></span><a href="#" onclick="app.showToast('Silakan hubungi administrator sistem untuk reset password'); return false;">Lupa password?</a></div>
+          <button class="login-submit" type="submit">Masuk</button>
+        </form>
+        <div class="login-divider"><span>ATAU</span></div>
+        <button class="login-sso login-sso-primary" onclick="app.demoLogin('ppk')"><span>▦</span> Masuk dengan Akun 365</button>
+        <button class="login-sso" onclick="app.demoLogin('pengembang')"><i data-lucide="building-2"></i> Masuk dengan Akun Mitra</button>
+        <div class="login-demo-hint">Demo cepat: akun di atas akan masuk sebagai <b>Tim Teknis</b>. Gunakan tombol mode setelah login untuk simulasi role lain.</div>
+        <small class="login-footer">Pusat Data dan Informasi<br>Kementerian Perumahan dan Kawasan Permukiman</small>
+      </div>
+    </div>
+  </section>
+
+  <div id="appShell" class="hidden">
+  <aside class="app-sidebar no-print">
+    <div class="sidebar-brand"><div class="sidebar-logo"><i data-lucide="home" class="w-5 h-5"></i></div><span>e-HUNTAP</span></div>
+    <div class="sidebar-role"><span>ROLE AKTIF</span><strong id="sidebarRoleLabel">Tim Teknis PKP</strong></div>
+    <nav class="sidebar-nav">
+      <button class="side-nav-item active" data-side-tab="dashboard" onclick="app.switchTab('dashboard')"><i data-lucide="layout-dashboard"></i><span>Dashboard</span></button>
+      <div class="sidebar-section-label">MODULES</div>
+      <button class="side-nav-item" data-side-tab="klaim" onclick="app.switchTab('klaim')"><i data-lucide="receipt"></i><span>Pengajuan Biaya</span><em id="sidebarClaimCount">8</em></button>
+      <button class="side-nav-item" data-side-tab="verifikasi" onclick="app.switchTab('verifikasi')"><i data-lucide="clipboard-check"></i><span>Verifikasi 3 Pilar</span><em id="sidebarPendingCount">2</em></button>
+      <button class="side-nav-item" data-side-tab="audit" onclick="app.switchTab('audit')"><i data-lucide="shield-check"></i><span>Audit APIP</span></button>
+      <button class="side-nav-item" data-side-tab="lahan" onclick="app.switchTab('lahan')"><i data-lucide="map-pin"></i><span>Pengendalian Lahan</span></button>
+      <button class="side-nav-item" data-side-tab="bav" onclick="app.switchTab('bav')"><i data-lucide="file-check-2"></i><span>Berita Acara</span></button>
+    </nav>
+    <div class="sidebar-bottom">
+      <button class="side-nav-item" onclick="app.showToast('Profil pengguna demo e-HUNTAP')"><i data-lucide="user-round"></i><span>Profil Pengguna</span></button>
+      <button class="side-nav-item" onclick="app.logout()"><i data-lucide="log-out"></i><span>Keluar</span></button>
+    </div>
+    <div class="sidebar-copyright">© 2026 <b>e-HUNTAP</b><br>Kementerian PKP RI</div>
+  </aside>
+  <div class="app-workspace">
+
+  <!-- Top Announcement Bar -->
+  <div id="announcementBar" class="bg-gradient-to-r from-amber-600 via-amber-500 to-yellow-500 text-white text-xs font-semibold px-4 py-1.5 flex items-center justify-between shadow-sm no-print">
+    <div class="flex items-center gap-2 max-w-7xl mx-auto w-full">
+      <span class="inline-flex items-center px-2 py-0.5 rounded bg-amber-900/40 text-amber-100 text-[10px] uppercase tracking-wider font-bold">
+        PBJ Darurat
+      </span>
+      <span>Instrumen Digital Pengadaan Huntap 40 Unit Aceh Tenggara • Berdasarkan <b>PerLKPP No. 6 Tahun 2024</b> (Biaya Plus Imbalan)</span>
+      <span class="ml-auto hidden md:inline-flex items-center gap-1 text-amber-100">
+        <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Terverifikasi APIP & Pengawas Konstruksi
+      </span>
+    </div>
+  </div>
+
+  <!-- Header Nav -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-20">
+        
+        <!-- Logo & Title -->
+        <div class="flex items-center gap-4 app-header-brand">
+          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center text-white shadow-md shadow-amber-500/20">
+            <i data-lucide="home" class="w-7 h-7"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="text-xl font-bold tracking-tight text-slate-900">e-HUNTAP <span class="text-amber-600">VERIKOST</span></h1>
+              <span class="bg-emerald-100 text-emerald-800 text-[11px] font-semibold px-2 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Sistem Aktif
+              </span>
+            </div>
+            <p class="text-xs text-slate-500 font-medium">
+              Kementerian Perumahan & Kawasan Permukiman RI • PPK Tanggap Darurat Bencana
+            </p>
+          </div>
+        </div>
+
+        <!-- Role Persona Selector -->
+        <div class="flex items-center gap-3">
+          <div class="text-right hidden sm:block">
+            <span class="text-[11px] uppercase tracking-wider font-bold text-slate-400 block">Simulasi Mode Pengguna:</span>
+            <span id="currentRoleLabel" class="text-xs font-semibold text-amber-700">Tim Teknis PKP</span>
+          </div>
+
+          <div class="relative inline-block">
+            <select id="roleSelector" onchange="app.switchRole(this.value)" class="bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-800 text-xs font-bold rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-amber-500 focus:outline-none transition cursor-pointer">
+              <option value="pengembang">🏢 Mode 1: Pengembang (Penyedia Terpilih)</option>
+              <option value="teknis" selected>👷 Mode 2: Tim Teknis PKP (Verifikator)</option>
+              <option value="apip">⚖️ Mode 3: APIP / BPKP (Auditor)</option>
+              <option value="ppk">👔 Mode 4: PPK & Pimpinan (Eksekutif)</option>
+            </select>
+          </div>
+
+          <!-- Quick Action: Buka di HP -->
+          <button onclick="app.openHpModal()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3 py-2.5 rounded-lg flex items-center gap-1.5 shadow-sm transition">
+            <i data-lucide="smartphone" class="w-4 h-4 text-blue-200"></i>
+            <span class="hidden md:inline">Buka di HP</span>
+          </button>
+
+          <!-- Quick Action: Print BAV -->
+          <button id="quickPrintBav" onclick="app.printBeritaAcara()" class="bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-3.5 py-2.5 rounded-lg flex items-center gap-1.5 shadow-sm transition">
+            <i data-lucide="printer" class="w-4 h-4 text-amber-400"></i>
+            <span class="hidden md:inline">Cetak BAV</span>
+          </button>
+          <button onclick="app.logout()" class="text-slate-500 hover:text-rose-600 text-xs font-semibold px-2 py-2.5 transition" title="Keluar">
+            <i data-lucide="log-out" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="flex space-x-1 border-t border-slate-100 -mb-px overflow-x-auto text-xs font-semibold">
+        <button onclick="app.switchTab('dashboard')" id="tab-dashboard" class="nav-tab active flex items-center gap-2 py-3 px-4 border-b-2 border-amber-600 text-amber-700">
+          <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+          <span>Dashboard & Rekapitulasi</span>
+        </button>
+        <button onclick="app.switchTab('klaim')" id="tab-klaim" class="nav-tab flex items-center gap-2 py-3 px-4 border-b-2 border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300">
+          <i data-lucide="receipt" class="w-4 h-4"></i>
+          <span>Pengajuan Biaya Riil (Actual Cost)</span>
+          <span id="badgeClaimCount" class="bg-slate-200 text-slate-700 rounded-full px-1.5 py-0.2 text-[10px]">8</span>
+        </button>
+        <button onclick="app.switchTab('verifikasi')" id="tab-verifikasi" class="nav-tab flex items-center gap-2 py-3 px-4 border-b-2 border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300">
+          <i data-lucide="clipboard-check" class="w-4 h-4"></i>
+          <span>Instrumen Checklist Verifikasi 3 Pilar</span>
+          <span id="badgePendingCount" class="bg-amber-100 text-amber-800 rounded-full px-1.5 py-0.2 text-[10px] font-bold">2 Antrean</span>
+        </button>
+        <button onclick="app.switchTab('audit')" id="tab-audit" class="nav-tab flex items-center gap-2 py-3 px-4 border-b-2 border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300">
+          <i data-lucide="shield-alert" class="w-4 h-4"></i>
+          <span>Audit Kewajaran & Mitigasi Risiko APIP</span>
+        </button>
+        <button onclick="app.switchTab('lahan')" id="tab-lahan" class="nav-tab flex items-center gap-2 py-3 px-4 border-b-2 border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300">
+          <i data-lucide="map-pin" class="w-4 h-4"></i>
+          <span>Pengendalian Lahan (4 Tahap UU 6/2023)</span>
+        </button>
+        <button onclick="app.switchTab('bav')" id="tab-bav" class="nav-tab flex items-center gap-2 py-3 px-4 border-b-2 border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300">
+          <i data-lucide="file-text" class="w-4 h-4"></i>
+          <span>Berita Acara Verifikasi (BAV)</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- Role Banner Context Indicator -->
+    <div id="roleContextBanner" class="mb-6 p-4 rounded-xl border border-blue-200 bg-blue-50/70 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 shadow-xs no-print">
+      <div class="flex items-center gap-3">
+        <div id="roleIconBox" class="w-10 h-10 rounded-lg bg-blue-600 text-white flex items-center justify-center shrink-0">
+          <i data-lucide="user-check" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h3 id="roleBannerTitle" class="text-sm font-bold text-slate-900">Peran Aktif: Tim Teknis Kementerian PKP</h3>
+          <p id="roleBannerDesc" class="text-xs text-slate-600">Anda berwenang menguji keabsahan fisik, spesifikasi RISHA/RUSPIN, dan volume nota/kuitansi sebelum diteruskan ke APIP.</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 shrink-0">
+        <span class="text-[11px] font-semibold text-slate-500">Paket:</span>
+        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-white border border-slate-200 text-slate-800">
+          Huntap 40 Unit Aceh Tenggara
+        </span>
+      </div>
+    </div>
+
+    <!-- TAB 1: DASHBOARD & REKAPITULASI -->
+    <section id="view-dashboard" class="tab-view space-y-6">
+      <div class="portal-page-heading no-print">
+        <div><span>MONITORING PENGADAAN DARURAT</span><h2>Dashboard e-HUNTAP</h2></div>
+        <p>Ringkasan verifikasi biaya riil, progres fisik, dan kepatuhan audit paket Huntap Aceh Tenggara.</p>
+      </div>
+      
+      <!-- Summary Cards Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <!-- Card 1: Pagu Indikatif -->
+        <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm hover:shadow transition">
+          <div class="flex items-center justify-between text-slate-400 mb-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Pagu Alokasi Darurat</span>
+            <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600">
+              <i data-lucide="wallet" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <div class="text-2xl font-extrabold text-slate-900 tracking-tight" id="dashPagu">Rp 6.400.000.000</div>
+          <div class="mt-2 flex items-center gap-1.5 text-xs text-slate-500">
+            <span class="font-medium">40 Unit Huntap + Lahan + PSU</span>
+            <span class="text-slate-300">•</span>
+            <span class="text-amber-600 font-semibold">@Rp 160 Jt/Unit</span>
+          </div>
+        </div>
+
+        <!-- Card 2: Biaya Riil Diajukan -->
+        <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm hover:shadow transition">
+          <div class="flex items-center justify-between text-slate-400 mb-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-blue-600">Biaya Riil Diajukan</span>
+            <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
+              <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <div class="text-2xl font-extrabold text-blue-900 tracking-tight" id="dashDiajukan">Rp 3.125.000.000</div>
+          <div class="mt-2 flex items-center gap-1 text-xs text-blue-600 font-medium">
+            <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+            <span>Termin I & II (Fisik 55%)</span>
+          </div>
+        </div>
+
+        <!-- Card 3: Biaya Riil Terverifikasi (Sah) -->
+        <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm hover:shadow transition">
+          <div class="flex items-center justify-between text-slate-400 mb-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-emerald-600">Biaya Riil Disetujui (Sah)</span>
+            <div class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
+              <i data-lucide="check-circle" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <div class="text-2xl font-extrabold text-emerald-900 tracking-tight" id="dashDisetujui">Rp 2.945.000.000</div>
+          <div class="mt-2 flex items-center gap-1 text-xs text-emerald-700 font-medium">
+            <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+            <span id="dashDisetujuiPersen">94.2% dari yang diajukan</span>
+          </div>
+        </div>
+
+        <!-- Card 4: Imbalan Fee Pengembang (Cost Plus Fee) -->
+        <div class="bg-white rounded-xl p-5 border border-amber-200 bg-amber-50/40 shadow-sm hover:shadow transition">
+          <div class="flex items-center justify-between text-slate-400 mb-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-amber-700">Imbalan Tetap (Fee 8%)</span>
+            <div class="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center text-amber-700">
+              <i data-lucide="award" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <div class="text-2xl font-extrabold text-amber-900 tracking-tight" id="dashFee">Rp 235.600.000</div>
+          <div class="mt-2 flex items-center gap-1 text-xs text-amber-800 font-semibold">
+            <span>Total Bayar: <b id="dashTotalBayar">Rp 3.180.600.000</b></span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Main Visual Section: Real-Cost vs Target & Status Breakdown -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Left: Rincian 5 Komponen Biaya Riil -->
+        <div class="lg:col-span-2 bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3 class="text-base font-bold text-slate-900">Distribusi Komponen Biaya Riil (Actual Cost)</h3>
+              <p class="text-xs text-slate-500">Sesuai PerLKPP 6/2024: Lahan, Material, Upah, Alat, dan Fasilitas PSU</p>
+            </div>
+            <span class="text-xs font-semibold px-2.5 py-1 rounded bg-slate-100 text-slate-700">40 Unit RISHA</span>
+          </div>
+
+          <!-- Progress bars per category -->
+          <div class="space-y-4" id="componentBreakdownList">
+            <!-- Rendered by JS -->
+          </div>
+
+          <div class="mt-6 pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500">
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded bg-emerald-500 inline-block"></span> <span>Biaya Riil Terverifikasi</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded bg-amber-500 inline-block"></span> <span>Dalam Verifikasi Teknis</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded bg-rose-500 inline-block"></span> <span>Ditolak / Koreksi Audit</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Audit Health & Quick Actions -->
+        <div class="bg-white rounded-xl p-6 border border-slate-200 shadow-sm flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-base font-bold text-slate-900">Kepatuhan Audit Darurat</h3>
+              <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800">Status Aman</span>
+            </div>
+            <p class="text-xs text-slate-500 mb-4">Pengawasan APIP (Inspektorat / BPKP) terhadap potensi risiko pengadaan darurat.</p>
+
+            <div class="space-y-3">
+              <div class="p-3 rounded-lg bg-slate-50 border border-slate-200 flex items-start gap-3">
+                <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
+                <div>
+                  <h4 class="text-xs font-bold text-slate-800">SK Status Tanggap Bencana</h4>
+                  <p class="text-[11px] text-slate-500">Justifikasi kebutuhan mendesak terpenuhi (Bupati Aceh Tenggara).</p>
+                </div>
+              </div>
+
+              <div class="p-3 rounded-lg bg-slate-50 border border-slate-200 flex items-start gap-3">
+                <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
+                <div>
+                  <h4 class="text-xs font-bold text-slate-800">Appraisal Lahan KJPP</h4>
+                  <p class="text-[11px] text-slate-500">Nilai wajar tanah terverifikasi Rp 150.000 / m².</p>
+                </div>
+              </div>
+
+              <div class="p-3 rounded-lg bg-amber-50/70 border border-amber-200 flex items-start gap-3">
+                <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-600 shrink-0 mt-0.5"></i>
+                <div>
+                  <h4 class="text-xs font-bold text-amber-900">Verifikasi Berkas Riil Termin II</h4>
+                  <p class="text-[11px] text-amber-700">Terdapat 1 faktur material semen butuh klarifikasi nota timbangan.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-6 pt-4 border-t border-slate-100">
+            <button onclick="app.switchTab('verifikasi')" class="w-full py-2.5 px-4 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-lg flex items-center justify-center gap-2 shadow-sm transition">
+              <i data-lucide="arrow-right-circle" class="w-4 h-4"></i>
+              Buka Lembar Verifikasi Lapangan
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Recent Transactions Table Preview -->
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div>
+            <h3 class="text-base font-bold text-slate-900">Ringkasan Klaim Biaya Riil Terbaru</h3>
+            <p class="text-xs text-slate-500">Daftar item belanja material, upah kerja, dan fasilitas yang diajukan Pengembang</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="app.switchTab('klaim')" class="text-xs font-bold text-amber-600 hover:text-amber-700 flex items-center gap-1">
+              Lihat Semua Pengajuan <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-50 text-slate-500 font-bold border-b border-slate-200 uppercase tracking-wider text-[10px]">
+              <tr>
+                <th class="py-3 px-4">No. Transaksi</th>
+                <th class="py-3 px-4">Komponen</th>
+                <th class="py-3 px-4">Uraian Pekerjaan / Material</th>
+                <th class="py-3 px-4 text-right">Nilai Klaim Riil</th>
+                <th class="py-3 px-4 text-right">Nilai Disetujui</th>
+                <th class="py-3 px-4 text-center">Bukti Transaksi</th>
+                <th class="py-3 px-4 text-center">Status Verifikasi</th>
+              </tr>
+            </thead>
+            <tbody id="dashTableBody" class="divide-y divide-slate-100">
+              <!-- Rendered by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- TAB 2: PENGAJUAN BIAYA RIIL (SISI PENGEMBANG) -->
+    <section id="view-klaim" class="tab-view hidden space-y-6">
+      
+      <!-- Top Action Bar for Claim Submission -->
+      <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-lg font-bold text-slate-900">Pengajuan Klaim Biaya Riil (*Actual Cost Reimbursement*)</h2>
+          <p class="text-xs text-slate-500">Pengembang berhak mengajukan reimbursement biaya nyata didukung bukti sah (faktur, nota, kuitansi upah, surat jalan).</p>
+        </div>
+        <div class="flex items-center gap-2">
+        <button id="newClaimButton" onclick="app.openNewClaimModal()" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold px-4 py-2.5 rounded-lg flex items-center gap-2 shadow-sm transition">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+            Tambah Bukti Pengeluaran Riil
+          </button>
+        </div>
+      </div>
+
+      <!-- Filters & Search -->
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+          <span class="font-bold text-slate-500">Filter Komponen:</span>
+          <select id="filterKomponen" onchange="app.renderClaimsTable()" class="bg-white border border-slate-300 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-amber-500">
+            <option value="all">Semua Komponen</option>
+            <option value="Lahan">Lahan (Ready-to-build)</option>
+            <option value="Material">Material RISHA / RUSPIN</option>
+            <option value="Upah">Upah Tenaga Kerja</option>
+            <option value="Peralatan">Sewa Alat Berat & Peralatan</option>
+            <option value="PSU">Fasilitas PSU (Jalan, Drainase, Air)</option>
+          </select>
+        </div>
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+          <span class="font-bold text-slate-500">Status:</span>
+          <select id="filterStatus" onchange="app.renderClaimsTable()" class="bg-white border border-slate-300 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-amber-500">
+            <option value="all">Semua Status</option>
+            <option value="Approved">Disetujui</option>
+            <option value="Pending">Menunggu Verifikasi</option>
+            <option value="Flagged">Perlu Revisi / Klarifikasi</option>
+            <option value="Rejected">Ditolak</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Claims Table Full -->
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-100 text-slate-600 font-bold border-b border-slate-200 uppercase tracking-wider text-[10px]">
+              <tr>
+                <th class="py-3.5 px-4">Kode / Tanggal</th>
+                <th class="py-3.5 px-4">Komponen</th>
+                <th class="py-3.5 px-4">Uraian Belanja Riil</th>
+                <th class="py-3.5 px-4">Penyedia / Toko / Pekerja</th>
+                <th class="py-3.5 px-4 text-right">Volume</th>
+                <th class="py-3.5 px-4 text-right">Harga Satuan</th>
+                <th class="py-3.5 px-4 text-right">Total Klaim</th>
+                <th class="py-3.5 px-4 text-center">Bukti Sah</th>
+                <th class="py-3.5 px-4 text-center">Status</th>
+                <th class="py-3.5 px-4 text-center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="fullClaimsTableBody" class="divide-y divide-slate-100 font-medium">
+              <!-- Rendered by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- TAB 3: CHECKLIST INSTRUMEN VERIFIKASI 3 PILAR (TIM TEKNIS) -->
+    <section id="view-verifikasi" class="tab-view hidden space-y-6">
+      
+      <div class="bg-gradient-to-r from-blue-900 to-slate-900 text-white rounded-xl p-6 shadow-md">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div>
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-800 text-blue-200 text-xs font-semibold mb-2">
+              <i data-lucide="check-check" class="w-3.5 h-3.5"></i> Standar Uji Teknis Kementerian PKP
+            </div>
+            <h2 class="text-xl font-bold tracking-tight">Instrumen Verifikasi Lapangan 3 Pilar</h2>
+            <p class="text-xs text-blue-200 mt-1 max-w-2xl">
+              Setiap klaim biaya riil pengembang harus lolos uji pada 3 pilar: <b>(1) Keabsahan Administratif Nota/Faktur</b>, <b>(2) Kesesuaian Spesifikasi RISHA/RUSPIN</b>, dan <b>(3) Opname Volume Fisik Terpasang di Lapangan</b>.
+            </p>
+          </div>
+          <div class="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20 text-center shrink-0">
+            <span class="text-xs uppercase tracking-wider text-blue-200 block font-semibold">Tingkat Kelulusan Uji</span>
+            <span class="text-2xl font-black text-amber-400" id="statPassRate">92%</span>
+            <span class="text-[10px] text-blue-200 block">Dari 8 Bukti Pengeluaran</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Verification Interactive Grid -->
+      <div class="space-y-4" id="verificationCardList">
+        <!-- Rendered by JS: Cards with 3-pillar checkboxes -->
+      </div>
+
+    </section>
+
+    <!-- TAB 4: AUDIT KEWAJARAN & MITIGASI RISIKO (APIP / BPKP) -->
+    <section id="view-audit" class="tab-view hidden space-y-6">
+      
+      <!-- APIP Matrix Header -->
+      <div class="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-purple-100 text-purple-800">
+                APIP / BPK / BPKP
+              </span>
+              <h2 class="text-lg font-bold text-slate-900">Matriks Mitigasi Risiko Audit Pengadaan Darurat</h2>
+            </div>
+            <p class="text-xs text-slate-500 mt-1">
+              Merujuk Slide 7 Dokumen Huntap: Pengawasan ketat pada Penunjukan Langsung, Markup Biaya Riil, dan Pengadaan Tanah & Rumah.
+            </p>
+          </div>
+          <button id="auditClearanceButton" onclick="app.issueAuditClearance()" class="bg-purple-700 hover:bg-purple-800 text-white text-xs font-bold px-4 py-2.5 rounded-lg flex items-center gap-2 shadow-sm transition">
+            <i data-lucide="stamp" class="w-4 h-4"></i>
+            Terbitkan Audit Clearance APIP
+          </button>
+        </div>
+      </div>
+
+      <!-- Risk Matrix Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        
+        <!-- Risk 1 -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Variabel 1</span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">Terkendali</span>
+            </div>
+            <h3 class="text-sm font-bold text-slate-900">Penunjukan Langsung (PL)</h3>
+            <div class="mt-2 text-xs text-slate-600 space-y-1.5">
+              <p><b class="text-rose-600">Potensi Risiko:</b> Tuduhan pengaturan / non-transparan.</p>
+              <p><b class="text-emerald-700">Mitigasi Terpenuhi:</b> Tersedia SK Tanggap Bencana & Berita Acara Justifikasi Teknis Kebutuhan Terdesak.</p>
+            </div>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+            <span>Dasar: PerLKPP 6/2024</span>
+            <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i>
+          </div>
+        </div>
+
+        <!-- Risk 2 -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Variabel 2</span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">Pengujian Aktif</span>
+            </div>
+            <h3 class="text-sm font-bold text-slate-900">Biaya Plus Imbalan (Cost Plus Fee)</h3>
+            <div class="mt-2 text-xs text-slate-600 space-y-1.5">
+              <p><b class="text-rose-600">Potensi Risiko:</b> Markup klaim biaya riil oleh pengembang.</p>
+              <p><b class="text-emerald-700">Mitigasi Terpenuhi:</b> Verifikasi berjenjang bukti faktur/kuitansi nyata & audit kewajaran harga pasar.</p>
+            </div>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+            <span>Sistem Auto Red-Flag Aktif</span>
+            <i data-lucide="check-circle" class="w-4 h-4 text-amber-600"></i>
+          </div>
+        </div>
+
+        <!-- Risk 3 -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Variabel 3</span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">Clear & Clean</span>
+            </div>
+            <h3 class="text-sm font-bold text-slate-900">Pengadaan Lahan & Rumah</h3>
+            <div class="mt-2 text-xs text-slate-600 space-y-1.5">
+              <p><b class="text-rose-600">Potensi Risiko:</b> Sengketa aset / harga tanah tidak wajar.</p>
+              <p><b class="text-emerald-700">Mitigasi Terpenuhi:</b> Penilaian kewajaran harga oleh KJPP independen & pendampingan BPN.</p>
+            </div>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+            <span>Lolos Uji Peta BPBD</span>
+            <i data-lucide="check-circle" class="w-4 h-4 text-emerald-600"></i>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Price Benchmark vs Actual Comparison (Audit Kewajaran) -->
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h3 class="text-base font-bold text-slate-900">Tabel Uji Kewajaran Harga Satuan (Benchmark KJPP / Standar Biaya)</h3>
+            <p class="text-xs text-slate-500">Algoritma otomatis mendeteksi apakah harga klaim melampaui toleransi batas wajar wilayah bencana (+10%).</p>
+          </div>
+          <span class="text-xs font-bold px-2.5 py-1 bg-purple-50 text-purple-700 rounded-lg border border-purple-200">
+            Parameter Aceh Tenggara 2026
+          </span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-50 text-slate-600 font-bold border-b border-slate-200 uppercase tracking-wider text-[10px]">
+              <tr>
+                <th class="py-3 px-4">Item Material / Jasa</th>
+                <th class="py-3 px-4">Satuan</th>
+                <th class="py-3 px-4 text-right">Batas Maks Wajar KJPP</th>
+                <th class="py-3 px-4 text-right">Harga Klaim Pengembang</th>
+                <th class="py-3 px-4 text-center">Deviasi (%)</th>
+                <th class="py-3 px-4 text-center">Status Audit</th>
+                <th class="py-3 px-4">Rekomendasi APIP</th>
+              </tr>
+            </thead>
+            <tbody id="benchmarkTableBody" class="divide-y divide-slate-100">
+              <!-- Rendered by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- TAB 5: PENGENDALIAN LAHAN (4 TAHAP UU 6/2023) -->
+    <section id="view-lahan" class="tab-view hidden space-y-6">
+      
+      <div class="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-amber-100 text-amber-800">
+              Dasar: UU No. 6/2023 & PP No. 21/2021
+            </span>
+            <h2 class="text-lg font-bold text-slate-900 mt-1">Alur Kerja & Pengecekan Lahan Pengembang (Ready-to-Build)</h2>
+            <p class="text-xs text-slate-500">4 Tahapan krusial legalitas dan keamanan lahan sebelum pencairan dana pengadaan.</p>
+          </div>
+          <div class="text-right">
+            <span class="text-xs text-slate-400 block font-semibold">Lokasi Site:</span>
+            <span class="text-xs font-bold text-slate-800">Kec. Semadam, Kab. Aceh Tenggara</span>
+          </div>
+        </div>
+
+        <!-- 4 Steps Interactive Workflow -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
+          
+          <!-- Step 1 -->
+          <div class="p-5 rounded-xl border-2 border-emerald-500 bg-emerald-50/40 relative">
+            <div class="w-8 h-8 rounded-full bg-emerald-600 text-white font-bold text-sm flex items-center justify-center mb-3">1</div>
+            <h4 class="text-xs font-bold text-slate-900">Kesesuaian Ruang & Zonasi Aman Bencana</h4>
+            <p class="text-[11px] text-slate-600 mt-2">
+              Lahan lolos uji peta risiko dari BPBD/BNPB Aceh Tenggara. Dipastikan berada di luar zona Kawasan Rawan Bencana (KRB).
+            </p>
+            <div class="mt-4 pt-3 border-t border-emerald-200 flex items-center gap-1.5 text-xs text-emerald-800 font-bold">
+              <i data-lucide="check" class="w-4 h-4"></i> Lolos Uji Peta BPBD
+            </div>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="p-5 rounded-xl border-2 border-emerald-500 bg-emerald-50/40 relative">
+            <div class="w-8 h-8 rounded-full bg-emerald-600 text-white font-bold text-sm flex items-center justify-center mb-3">2</div>
+            <h4 class="text-xs font-bold text-slate-900">Validasi Sertifikasi Clean & Clear</h4>
+            <p class="text-[11px] text-slate-600 mt-2">
+              Sertifikat Induk Hak Milik No. 0412/SMD terdaftar sah. Bebas sengketa tumpang tindih, klaim waris, maupun agunan bank.
+            </p>
+            <div class="mt-4 pt-3 border-t border-emerald-200 flex items-center gap-1.5 text-xs text-emerald-800 font-bold">
+              <i data-lucide="check" class="w-4 h-4"></i> Validasi BPN Selesai
+            </div>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="p-5 rounded-xl border-2 border-emerald-500 bg-emerald-50/40 relative">
+            <div class="w-8 h-8 rounded-full bg-emerald-600 text-white font-bold text-sm flex items-center justify-center mb-3">3</div>
+            <h4 class="text-xs font-bold text-slate-900">Kepastian Pemecahan & Distribusi</h4>
+            <p class="text-[11px] text-slate-600 mt-2">
+              Site plan 40 kaveling disetujui Dinas PUPR. Komitmen balik nama menjadi aset Pemda / Hak Milik warga penerima bantuan.
+            </p>
+            <div class="mt-4 pt-3 border-t border-emerald-200 flex items-center gap-1.5 text-xs text-emerald-800 font-bold">
+              <i data-lucide="check" class="w-4 h-4"></i> Site Plan Disahkan
+            </div>
+          </div>
+
+          <!-- Step 4 -->
+          <div class="p-5 rounded-xl border-2 border-emerald-500 bg-emerald-50/40 relative">
+            <div class="w-8 h-8 rounded-full bg-emerald-600 text-white font-bold text-sm flex items-center justify-center mb-3">4</div>
+            <h4 class="text-xs font-bold text-slate-900">Penguncian Risiko ke Klausul Kontrak</h4>
+            <p class="text-[11px] text-slate-600 mt-2">
+              Legalitas lahan dikunci sebagai syarat mutlak pembayaran. Jika terjadi sengketa, pengembang dianggap gagal performa.
+            </p>
+            <div class="mt-4 pt-3 border-t border-emerald-200 flex items-center gap-1.5 text-xs text-emerald-800 font-bold">
+              <i data-lucide="shield-check" class="w-4 h-4"></i> Terkunci di SPMK/Kontrak
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Detail Information on Selected Land -->
+        <div class="mt-6 p-4 rounded-xl bg-slate-50 border border-slate-200 grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+          <div>
+            <span class="text-slate-400 block font-semibold uppercase text-[10px]">Luas Efektif Lahan</span>
+            <span class="font-extrabold text-slate-800 text-sm">6.000 m² (40 Kavling + PSU)</span>
+            <span class="text-slate-500 block text-[11px]">Luas Kavling: 100 m² / unit Huntap</span>
+          </div>
+          <div>
+            <span class="text-slate-400 block font-semibold uppercase text-[10px]">Harga Pengadaan per m²</span>
+            <span class="font-extrabold text-slate-800 text-sm">Rp 150.000 / m²</span>
+            <span class="text-emerald-700 block text-[11px]">Sesuai Nilai Pasar Wajar KJPP</span>
+          </div>
+          <div>
+            <span class="text-slate-400 block font-semibold uppercase text-[10px]">Total Nilai Lahan Riil</span>
+            <span class="font-extrabold text-emerald-700 text-sm">Rp 900.000.000</span>
+            <span class="text-slate-500 block text-[11px]">Termasuk biaya pematangan lahan</span>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- TAB 6: CETAK BERITA ACARA VERIFIKASI (BAV RESMI) -->
+    <section id="view-bav" class="tab-view hidden space-y-6">
+      
+      <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm flex items-center justify-between no-print">
+        <div>
+          <h2 class="text-lg font-bold text-slate-900">Format Resmi Berita Acara Verifikasi (BAV) Biaya Riil</h2>
+          <p class="text-xs text-slate-500">Dokumen pertanggungjawaban bersama antara Pengembang, Tim Teknis PKP, dan APIP untuk pencairan termin.</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="bavPrintButton" onclick="window.print()" class="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-4 py-2.5 rounded-lg flex items-center gap-2 shadow-sm transition">
+            <i data-lucide="printer" class="w-4 h-4 text-amber-400"></i>
+            Cetak / Simpan PDF
+          </button>
+        </div>
+      </div>
+
+      <!-- Printable BAV Document Container -->
+      <div class="bg-white p-8 md:p-12 rounded-xl border border-slate-300 shadow-md max-w-4xl mx-auto printable-area text-slate-900">
+        
+        <!-- Kop Surat Resmi -->
+        <div class="border-b-4 border-double border-slate-900 pb-4 mb-6 text-center">
+          <div class="text-xs font-bold tracking-widest uppercase text-slate-700">KEMENTERIAN PERUMAHAN DAN KAWASAN PERMUKIMAN</div>
+          <div class="text-sm font-extrabold uppercase text-slate-900 mt-0.5">DIREKTORAT JENDERAL PERUMAHAN</div>
+          <div class="text-xs font-semibold text-slate-700">SATUAN KERJA PENYEDIAAN PERUMAHAN PROVINSI ACEH</div>
+          <div class="text-[10px] text-slate-500 mt-1">Alamat Posko: Jl. Kutacane - Blangkejeren, Kab. Aceh Tenggara • Email: pbj.darurat@pkp.go.id</div>
+        </div>
+
+        <div class="text-center mb-6">
+          <h2 class="text-sm font-bold uppercase underline tracking-wide">BERITA ACARA VERIFIKASI BIAYA RIIL (BAV)</h2>
+          <div class="text-xs font-mono font-semibold text-slate-700 mt-1">Nomor: BAV-02/PPK-HUNTAP/PKP-AC/XI/2026</div>
+        </div>
+
+        <div class="text-xs text-slate-800 space-y-3 leading-relaxed">
+          <p>
+            Pada hari ini, <b>Senin</b> tanggal <b>Sembilan</b> bulan <b>November</b> tahun <b>Dua Ribu Dua Puluh Enam</b>, bertempat di Kantor Tim Satuan Tugas Penanganan Darurat Bencana Aceh Tenggara, yang bertanda tangan di bawah ini:
+          </p>
+
+          <ol class="list-decimal pl-5 space-y-2">
+            <li>
+              <b>PT. KARYA ACEH MEMBANGUN</b>, selaku Pengembang/Penyedia Terpilih Pembangunan 40 Unit Huntap Aceh Tenggara.
+            </li>
+            <li>
+              <b>TIM TEKNIS KEMENTERIAN PKP</b>, berdasarkan Surat Keputusan PPK Tanggap Darurat Bencana No. 08/KPTS/PPK/2026.
+            </li>
+            <li>
+              <b>TIM PENGAWAS / APIP INSPEKTORAT JENDERAL KEMENTERIAN PKP</b>, selaku verifikator kepatuhan akuntabilitas keuangan negara.
+            </li>
+          </ol>
+
+          <p>
+            Menyatakan bahwa telah dilakukan pengujian bersama terhadap bukti-bukti pengeluaran riil (*Actual Cost Reimbursement*) untuk pelaksanaan <b>Pembangunan 40 Unit Huntap Teknologi RISHA/RUSPIN beserta PSU</b> dengan hasil sebagai berikut:
+          </p>
+
+          <!-- Table Rincian Verifikasi -->
+          <div class="my-4 overflow-x-auto">
+            <table class="w-full border-collapse border border-slate-400 text-xs">
+              <thead class="bg-slate-100 font-bold text-center">
+                <tr>
+                  <th class="border border-slate-400 p-2">No</th>
+                  <th class="border border-slate-400 p-2">Komponen Biaya Riil</th>
+                  <th class="border border-slate-400 p-2 text-right">Nilai Diajukan (Rp)</th>
+                  <th class="border border-slate-400 p-2 text-right">Nilai Disetujui Sah (Rp)</th>
+                  <th class="border border-slate-400 p-2">Keterangan / Dasar Pengujian</th>
+                </tr>
+              </thead>
+              <tbody id="bavTableBody">
+                <!-- Rendered by JS -->
+              </tbody>
+              <tfoot class="font-bold bg-slate-50">
+                <tr>
+                  <td colspan="2" class="border border-slate-400 p-2 text-right">TOTAL BIAYA RIIL SAH:</td>
+                  <td class="border border-slate-400 p-2 text-right" id="bavTotalDiajukan">-</td>
+                  <td class="border border-slate-400 p-2 text-right text-emerald-800" id="bavTotalSah">-</td>
+                  <td class="border border-slate-400 p-2 text-center text-[10px]">Telah diaudit fisik & bukti</td>
+                </tr>
+                <tr>
+                  <td colspan="3" class="border border-slate-400 p-2 text-right">IMBALAN TETAP PENGEMBANG (FEE 8%):</td>
+                  <td class="border border-slate-400 p-2 text-right text-amber-800" id="bavFeeTetap">-</td>
+                  <td class="border border-slate-400 p-2 text-center text-[10px]">PerLKPP No. 6 Tahun 2024</td>
+                </tr>
+                <tr class="bg-amber-100/60 font-black text-sm">
+                  <td colspan="3" class="border border-slate-400 p-2.5 text-right">TOTAL REKOMENDASI PEMBAYARAN:</td>
+                  <td class="border border-slate-400 p-2.5 text-right text-slate-900" id="bavGrandTotal">-</td>
+                  <td class="border border-slate-400 p-2.5 text-center text-xs">Siap Terbit SPP / SPM</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+
+          <p class="text-[11px] text-slate-600 italic">
+            *Catatan: Seluruh bukti fisik nota, faktur pajak, daftar hadir pekerja, dan Berita Acara Opname Terpasang telah ditandatangani dan diarsipkan secara digital dalam pangkalan data e-HUNTAP.
+          </p>
+
+          <!-- Tanda Tangan 4 Pihak -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-8 pt-6 border-t border-slate-200 text-center text-xs">
+            <div>
+              <span class="text-[10px] text-slate-500 uppercase block">Penyedia / Pengembang</span>
+              <div class="h-16 flex items-center justify-center font-serif text-slate-400 italic text-sm">
+                [Ttd Digital]
+              </div>
+              <div class="font-bold underline text-slate-900">Ir. H. Syarifuddin, MT</div>
+              <div class="text-[10px] text-slate-500">Direktur Utama Pengembang</div>
+            </div>
+
+            <div>
+              <span class="text-[10px] text-slate-500 uppercase block">Tim Teknis PKP</span>
+              <div class="h-16 flex items-center justify-center font-serif text-slate-400 italic text-sm">
+                [Ttd Digital]
+              </div>
+              <div class="font-bold underline text-slate-900">Rahmat Hidayat, ST</div>
+              <div class="text-[10px] text-slate-500">Koordinator Teknis RISHA</div>
+            </div>
+
+            <div>
+              <span class="text-[10px] text-slate-500 uppercase block">Auditor APIP</span>
+              <div class="h-16 flex items-center justify-center font-serif text-slate-400 italic text-sm">
+                [Ttd Digital]
+              </div>
+              <div class="font-bold underline text-slate-900">Drs. Ahmad Fauzi, Ak., CA</div>
+              <div class="text-[10px] text-slate-500">Pengendali Teknis BPKP/Itjen</div>
+            </div>
+
+            <div>
+              <span class="text-[10px] text-slate-500 uppercase block">Pejabat Pembuat Komitmen</span>
+              <div class="h-16 flex items-center justify-center font-serif text-slate-400 italic text-sm">
+                [Ttd Digital]
+              </div>
+              <div class="font-bold underline text-slate-900">M. Ridwan, ST., M.Sc</div>
+              <div class="text-[10px] text-slate-500">NIP. 19820415 200812 1 002</div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Modal: Tambah Klaim Biaya Riil Baru -->
+  <div id="newClaimModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden no-print p-4">
+    <div class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-slate-200">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center">
+            <i data-lucide="file-plus" class="w-4 h-4"></i>
+          </div>
+          <h3 class="text-base font-bold text-slate-900">Input Bukti Pengeluaran Riil (Actual Cost)</h3>
+        </div>
+        <button onclick="app.closeNewClaimModal()" class="text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="newClaimForm" onsubmit="app.handleNewClaimSubmit(event)" class="space-y-4 mt-4 text-xs">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Komponen Pengeluaran *</label>
+            <select id="formKomponen" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-amber-500">
+              <option value="Material">Material RISHA / RUSPIN</option>
+              <option value="Upah">Upah Tenaga Kerja</option>
+              <option value="Peralatan">Sewa Alat Berat & Peralatan</option>
+              <option value="PSU">Fasilitas PSU (Jalan, Air, Drainase)</option>
+              <option value="Lahan">Lahan (Ready-to-Build)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Nomor Bukti (Faktur/Nota/Kuitansi) *</label>
+            <input type="text" id="formNoBukti" required placeholder="Contoh: INV-SG/2026/044" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-amber-500 font-mono">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Uraian Pekerjaan / Material Nyata *</label>
+          <input type="text" id="formUraian" required placeholder="Contoh: Semen Portland Tipe 1 untuk adukan modul RISHA" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-amber-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Nama Toko / Subkontraktor / Mandor *</label>
+            <input type="text" id="formPenyedia" required placeholder="Contoh: Toko Bangunan Aceh Sentosa" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-amber-500">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Tanggal Transaksi Sah *</label>
+            <input type="date" id="formTanggal" required value="2026-11-08" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-amber-500">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Volume *</label>
+            <input type="number" id="formVolume" required placeholder="Contoh: 200" oninput="app.calculateFormTotal()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-amber-500">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Satuan *</label>
+            <input type="text" id="formSatuan" required placeholder="Zak / Batang / Hari" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-amber-500">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Harga Satuan Riil (Rp) *</label>
+            <input type="number" id="formHarga" required placeholder="75000" oninput="app.calculateFormTotal()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-amber-500">
+          </div>
+        </div>
+
+        <div class="p-3 bg-amber-50/70 border border-amber-200 rounded-lg flex items-center justify-between">
+          <span class="text-xs font-bold text-amber-900">Total Nilai Riil Diajukan:</span>
+          <span class="text-base font-extrabold text-amber-800" id="formTotalDisplay">Rp 0</span>
+        </div>
+
+        <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+          <button type="button" onclick="app.closeNewClaimModal()" class="px-4 py-2 border border-slate-300 text-slate-600 font-bold rounded-lg hover:bg-slate-100">Batal</button>
+          <button type="submit" class="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-lg shadow-sm flex items-center gap-1.5">
+            <i data-lucide="check" class="w-4 h-4"></i> Ajukan Klaim
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Preview Bukti Lampiran Transaksi -->
+  <div id="previewBuktiModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden no-print p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <h3 class="text-sm font-bold text-slate-900" id="buktiModalTitle">Detail Bukti Transaksi Sah</h3>
+        <button onclick="app.closeBuktiModal()" class="text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div class="mt-4 space-y-3 text-xs" id="buktiModalBody">
+        <!-- Rendered by JS -->
+      </div>
+      <div class="mt-5 pt-3 border-t border-slate-100 text-right">
+        <button onclick="app.closeBuktiModal()" class="px-4 py-2 bg-slate-900 text-white font-bold rounded-lg text-xs">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Buka di HP (QR Code & IP) -->
+  <div id="hpModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden no-print p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center">
+            <i data-lucide="smartphone" class="w-4 h-4"></i>
+          </div>
+          <h3 class="text-base font-bold text-slate-900">Buka Aplikasi di HP / Ponsel</h3>
+        </div>
+        <button onclick="app.closeHpModal()" class="text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="mt-4 space-y-4 text-xs">
+        <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 flex items-start gap-2.5">
+          <i data-lucide="wifi" class="w-5 h-5 text-amber-600 shrink-0 mt-0.5"></i>
+          <div>
+            <b>Syarat Utama:</b> Pastikan HP dan Laptop Anda terhubung ke <b>jaringan Wi-Fi yang sama</b> (atau gunakan Hotspot HP ke Laptop).
+          </div>
+        </div>
+
+        <div class="text-center space-y-2">
+          <span class="text-slate-500 font-semibold block text-[11px]">Scan QR Code ini menggunakan Kamera HP Anda:</span>
+          <div class="inline-block p-2 bg-white rounded-xl border border-slate-300 shadow-xs">
+            <img id="hpQrImage" src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=http://10.111.0.85:8000" alt="QR Code" class="w-44 h-44 mx-auto" />
+          </div>
+        </div>
+
+        <div>
+          <span class="text-slate-500 font-semibold block mb-1">Atau ketik alamat ini di Chrome / Safari HP:</span>
+          <div class="flex items-center gap-2">
+            <input type="text" id="hpUrlInput" readonly value="http://10.111.0.85:8000" class="w-full bg-slate-100 border border-slate-300 rounded-lg p-2.5 font-mono text-xs font-bold text-blue-700">
+            <button onclick="app.copyHpUrl()" class="px-3 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg font-bold shrink-0">Salin</button>
+          </div>
+        </div>
+
+        <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 text-slate-600 text-[11px] space-y-1">
+          <div class="font-bold text-slate-800">Langkah Menjalankan:</div>
+          <div>1. Buka PowerShell / Terminal di laptop, jalankan: <code class="bg-slate-200 px-1 py-0.5 rounded font-mono font-bold">python server.py</code></div>
+          <div>2. Scan QR di atas atau buka link tersebut di HP.</div>
+        </div>
+      </div>
+
+      <div class="mt-5 pt-3 border-t border-slate-100 text-right">
+        <button onclick="app.closeHpModal()" class="px-4 py-2 bg-slate-900 text-white font-bold rounded-lg text-xs">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Toast -->
+  <div id="toastNotification" class="fixed bottom-5 right-5 z-50 hidden transition-all duration-300 transform translate-y-2">
+    <div class="bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-3 border border-slate-700 text-xs">
+      <div id="toastIconBox" class="text-amber-400">
+        <i data-lucide="info" class="w-5 h-5"></i>
+      </div>
+      <span id="toastMessage" class="font-medium">Pesan sistem</span>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-slate-200 py-4 px-6 text-center text-xs text-slate-500 no-print mt-auto">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+      <div class="flex items-center gap-2">
+        <span class="font-bold text-slate-700">e-HUNTAP VERIKOST v1.0</span>
+        <span>•</span>
+        <span>Kementerian Perumahan dan Kawasan Permukiman Republik Indonesia</span>
+      </div>
+      <div>
+        <span>Mitigasi Risiko Audit Pengadaan Darurat Berbasis PerLKPP No. 6 Tahun 2024</span>
+      </div>
+    </div>
+  </footer>
+  </div>
+  </div>
+
+  <!-- App Script -->
+  <script src="app.js"></script>
+</body>
+</html>
